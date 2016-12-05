@@ -2,27 +2,27 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 class HOMLClusterAlgo(object):
-"""
-	This is a template for a clustering model class.
-	Build the functions required.
-"""
+#"""
+#	This is a template for a clustering model class.
+#	Build the functions required.
+#"""
 
-    def __init__(self, *args, **kwargs):
-        self.k_clusters = k_clusters # Remove if your algo discovers k
+    def __init__(self, cluster_labels, min_sim, num_seeds):
+        #self.k_clusters = k_clusters # Remove if your algo discovers k
         self.cluster_labels = None
         self.min_sim = min_sim
         self.num_seeds = num_seeds
-        self.exclude = exclude
+        #self.exclude = exclude
         pass
 
     def fit(self, feature_vectors):
-	"""
-		This method receives the objects to cluster
-		and finds the assigned cluster labels.
+#	"""
+#		This method receives the objects to cluster
+#		and finds the assigned cluster labels.
 
-		--- Explain any function arguments ---
+#		--- Explain any function arguments ---
 
-	"""
+#	"""
 
 	# Typecheck the input data
 	if not isinstance(feature_vectors, (np.ndarray, list)):
@@ -30,11 +30,11 @@ class HOMLClusterAlgo(object):
 
 	self.cluster_labels = [0] * len(feature_vectors) # Replace this with actual computation
 	
-        sim_list = []
+	sim_list = []
 	counts = [0]*len(feature_vectors)
 	for i in range(len(feature_vectors)):
 	    for j in range(len(feature_vectors)):
-	        sim = float(cosine_similarity(feature_vectors[i],feature_vectors[j]))
+	        sim = float(cosine_similarity(feature_vectors[i].reshape(1,-1),feature_vectors[j].reshape(1,-1)))
 	        sim_list.append((i,j,sim))
 		if sim > self.min_sim:
 		    counts[i] += 1
@@ -60,15 +60,12 @@ class HOMLClusterAlgo(object):
                 seeds = s_counts_short[:self.num_seeds]
 
         # Labeling clusters
-        if self.exclude:
-		pass
-        else:
-            largest = 0
+        largest = 0
 
-            for i in range(len(feature_vectors)):
-                for j, item in enumerate(seeds):
-                    if sim_dict[(item,i)] > sim_dict[(seeds[largest],i)]:
-                        largest = j
-                self.cluster_labels[i] = largest
+        for i in range(len(feature_vectors)):
+            for j, item in enumerate(seeds):
+                if sim_dict[(item,i)] > sim_dict[(seeds[largest],i)]:
+                    largest = j
+            self.cluster_labels[i] = largest
 
         return self
