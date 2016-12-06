@@ -8,7 +8,6 @@ class HOMLClusterAlgo(object):
 #"""
 
     def __init__(self, cluster_labels, min_sim, num_seeds):
-        #self.k_clusters = k_clusters # Remove if your algo discovers k
         self.cluster_labels = None
         self.min_sim = min_sim
         self.num_seeds = num_seeds
