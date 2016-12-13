@@ -1,70 +1,39 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import scipy
+from math import hypot
+from numpy.linalg import norm
+from scipy.spatial import distance
 
 class HOMLClusterAlgo(object):
-		# This is a template for a clustering model class.
-		# Build the functions required.
-
-
+		# Algorithm for Clustering
 		# initialize 1st cluster (put first vector into cluster)
 		# update aux cluster
-
+		#
 		# do rest of the samples
 		# 	do for all aux cluster
-				# check distance and cosine values
-				# assign a value that shows the fitting of the cluster
-				# if pass threshold # modify for solution 1
-					# mark this cluster eligible
-
-			if eligible cluster is = 0
-				create new cluster
-				add vector to cluster
-				label cluster
-				update aux cluster
-			else if eligible cluster is = 1
-				put vector into that cluster
-				update aux cluster
-			else (if eligible cluster is > 1)
-				find the highest fitting values (max)
-				put vector into that cluster
-				update aux cluster
-			#if cluster number is > 15 # add for solution 2
-			#	combine cluster
-
-		print number of clusters
-		combine cluster # original idea
-
-
-		# optimization option
-		# generative clustering may be heavy as cluster increases
-		# solution 1: create a lower threshold values
-		#	less clusters, but le3ss accurate
-		# solution 2: combine cluster when cluster reaches x (say 15)
-		#	quicker, less accurate, but not as bad as solution 1
-
-		---
-		def update aux cluster
-			aux cluster = add all vectors in cluster/number of cluster
-		---
-		def combine cluster
-			while cluster number is > 10
-				find the highest/last cluster
-				do rest of aux cluster
-					check distances and cosine values
-					find highest number of of fitting
-				combine cluster to highest fit cluster
-				update aux cluster
+		# 		check cosine values ONLY
+		#		check dist solved, now what to do
+		# 		assign a value that shows the fitting of the cluster
+		#		if cos is higher than threshold
+		#
+		# print number of clusters
+		# combine cluster # original idea
+		#
+		#
+		# # optimization option
+		# # generative clustering may be heavy as cluster increases
+		# # solution 1: create a lower threshold value
+		# #	less clusters, but less accurate
+		# # solution 2: combine cluster when cluster reaches x (say 15)
+		# #	quicker, less accurate, but not as bad as solution 1
 
 
 
-
-
-
-	def __init__(self, *args, **kwargs):
-		self.cluster_labels = None			# cluster labels
-		self.aux_cluster = aux_cluster 		# average of cluster member
-		self.sim_score = sim_score			# similarity score for comparison
-		self.eligibility = eligibility		# eligibility statement
+	def __init__(self, cluster_labels, num_class, threshold_value):
+		self.cluster_labels = None				# cluster labels
+		self.num_class = num_class				# number of classifier
+		self.threshold_value = threshold_value 	# threshold_value
 		pass
 
 	def fit(self, feature_vectors):
@@ -80,47 +49,46 @@ class HOMLClusterAlgo(object):
 		if not isinstance(feature_vectors, (np.ndarray, list)):
 			raise TypeError("Feature vectors not numpy arrays.")
 
-
 		self.cluster_labels = [0] * len(feature_vectors) # label all cluster [0]
+		aux_cluster = [0] * len(feature_vectors)
+		aux_cluster[0] = feature_vectors[0] # 1st aux cluster is 1st vector
 
-		self.cluster_labels[0] = [0]	# label 1st cluster
-		self.aux_cluster = feature_vectors[1] # 1st aux cluster is 1st vector
-		self.sim_score = [0]
-		threshold_value = 0.8
-		for i in range(2,len(feature_vectors)): # do all vector from 2
-			eligible_cluster = 0
-			for j in range(len(self.aux_cluster)):	# do all current aux cluster
-				sim_cos = float(cosine_similarity( \
-				feature_vectors[i].reshape(1,-1),
-				self.aux_cluster[j].reshape(1,-1))) # check cosine
-				# sim_dist = abs(float(feature_vectors[i] - /
-				# self.aux_cluster[j])) # check distance
-				sim_dist = float(hypot(feature_vectors[i],
-				self.aux_cluster[j])) # check distance via hypot
-				self.sim_score[j] = np.mean(sim_cos, sim_dist) # similarity
-				if self.sim_score[j] > threshold_value: # check eligibility
-					eligible_cluster += 1
-					self.eligibility[j] = True
+		for i in range(1,len(feature_vectors)): # do all vector from 1
+			new_tres = 0
+			print "feature_vectors length", len(feature_vectors)
+			print "Doing feature_vectors",i,"out of",len(feature_vectors)
+			for j in range(len(aux_cluster)):	# do all current aux cluster
 
-			if eligible_cluster = 0: # create new cluster
-				self.cluster_labels[len(self.aux_cluster) + 1 ] = \
-				len(self.aux_cluster) + 1
-				self.aux_cluster[len(self.aux_cluster) + 1 ] = \
-				feature_vectors[i]
-			elif eligible_cluster = 1: # add vector to cluster
-				ok_cluster = self.eligibility.index(True)
-				self.aux_cluster[ok_cluster] = sum(self.aux_cluster,
-				feature_vectors[i]) / 2
-			else eligible_cluster > 1: # pick highest score, add to that cluster
-				 hi_sim = max(self.sim_score) # highest similarity
+				print "Doing aux cluster",j,"out of",len(aux_cluster)
+				if np.all(aux_cluster[j] == 0) :
+					print "There are no more aux cluster! Break!"
+					break # no more aux cluster to compare
+				aux_cls_hld = np.asarray(aux_cluster[j])
 
+				# this is for checking cosine
+				sim_cos = float(cosine_similarity(feature_vectors[i].reshape(1,-1),aux_cls_hld.reshape(1,-1))) # check cosine
+				# this is for checking distance
+				real_dist = np.sqrt(np.abs(np.sum((feature_vectors[i].__sub__(aux_cls_hld)))))
+				sim_dist = np.sqrt(np.abs(np.sum(aux_cluster[j])))
+				sim_dist = (sim_dist - real_dist)/(sim_dist)
+				# mean of both similarity score
+				sim_score = np.mean([sim_cos,sim_dist])
+				print "Distance similarity", sim_dist
+				print "Cosine similarity", sim_cos
+				print "Average similarity", sim_score
+				print ("-")*10
 
+				if sim_score >= self.threshold_value:
+					if sim_score > new_tres: self.cluster_labels[i]=j
+					new_tres = sim_score
+				else:
+					add_aux = 0
+					for k in range(len(aux_cluster)):
+						add_aux += k
+						if np.all(aux_cluster[k] == 0): break
+					print add_aux
+					aux_cluster[add_aux] = feature_vectors[i]
 
-
-
+			print self.cluster_labels[i]
 
 		return self
-
-
-	def update_aux(self, aux_cluster):
-		pass
