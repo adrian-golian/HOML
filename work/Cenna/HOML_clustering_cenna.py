@@ -55,7 +55,6 @@ class HOMLClusterAlgo(object):
 
 		for i in range(1,len(feature_vectors)): # do all vector from 1
 			new_tres = 0
-			print "feature_vectors length", len(feature_vectors)
 			print "Doing feature_vectors",i,"out of",len(feature_vectors)
 			for j in range(len(aux_cluster)):	# do all current aux cluster
 
@@ -73,20 +72,21 @@ class HOMLClusterAlgo(object):
 				sim_dist = (sim_dist - real_dist)/(sim_dist)
 				# mean of both similarity score
 				sim_score = np.mean([sim_cos,sim_dist])
-				print "Distance similarity", sim_dist
-				print "Cosine similarity", sim_cos
-				print "Average similarity", sim_score
-				print ("-")*10
+				# print "Distance similarity	:", sim_dist
+				# print "Cosine similarity	:", sim_cos
+				print "Average similarity	:", sim_score
+				# print ("-")*10
 
 				if sim_score >= self.threshold_value:
 					if sim_score > new_tres: self.cluster_labels[i]=j
 					new_tres = sim_score
 				else:
 					add_aux = 0
+					print aux_cluster
 					for k in range(len(aux_cluster)):
 						add_aux += k
 						if np.all(aux_cluster[k] == 0): break
-					print add_aux
+					print "add_aux =",add_aux
 					aux_cluster[add_aux] = feature_vectors[i]
 
 			print self.cluster_labels[i]
