@@ -27,7 +27,14 @@ class HOMLClusterAlgo(object):
 		# #	less clusters, but less accurate
 		# # solution 2: combine cluster when cluster reaches x (say 15)
 		# #	quicker, less accurate, but not as bad as solution 1
-
+		# def combine cluster
+		# 	while cluster number is > 10
+		# 		find the highest/last cluster
+		# 		do rest of aux cluster
+		# 			check distances and cosine values
+		# 			find highest number of of fitting
+		# 		combine cluster to highest fit cluster
+		# 		update aux cluster
 
 
 	def __init__(self, cluster_labels, num_class, threshold_value):
@@ -57,7 +64,6 @@ class HOMLClusterAlgo(object):
 			new_tres = 0
 			print "Doing feature_vectors",i,"out of",len(feature_vectors)
 			for j in range(len(aux_cluster)):	# do all current aux cluster
-
 				print "Doing aux cluster",j,"out of",len(aux_cluster)
 				if np.all(aux_cluster[j] == 0) :
 					print "There are no more aux cluster! Break!"
@@ -80,15 +86,20 @@ class HOMLClusterAlgo(object):
 				if sim_score >= self.threshold_value:
 					if sim_score > new_tres: self.cluster_labels[i]=j
 					new_tres = sim_score
-				else:
-					add_aux = 0
-					print aux_cluster
-					for k in range(len(aux_cluster)):
-						add_aux += k
-						if np.all(aux_cluster[k] == 0): break
-					print "add_aux =",add_aux
-					aux_cluster[add_aux] = feature_vectors[i]
+			if (self.cluster_labels[i] == 0):
+				add_aux = 0
+				for k in range(len(aux_cluster)):
+					# print "add_aux sebelum",k
+					# print "add_aux sesudah",k
+					if np.all(aux_cluster[k] == 0): break
+					add_aux += 1
+				# 	print "add_aux masih ada di sini! ", add_aux
+				# print "add_aux =",add_aux
+				aux_cluster[add_aux] = feature_vectors[i]
+				print "Nilai aux_cluster skrg:", aux_cluster[add_aux]
+				self.cluster_labels[i] = add_aux
 
-			print self.cluster_labels[i]
+
+			print "This feature_vectors(",i,") is labeled as",self.cluster_labels[i]
 
 		return self
